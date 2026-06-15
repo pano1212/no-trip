@@ -1,0 +1,139 @@
+version: "2"
+type: frontend
+tech_stack:
+  - TypeScript
+  - React 19
+  - Vite 6
+  - Firebase Firestore optional persistence
+  - localStorage demo-mode persistence
+  - lucide-react icons
+routes:
+  - path: /
+    file: src/App.tsx
+    auth_required: false
+    description: Mock login screen followed by the trip finance dashboard.
+features:
+  - name: Mock Login
+    description: User enters any valid email and non-empty password to access the dashboard.
+    files:
+      - src/App.tsx
+      - src/components/LoginPage.tsx
+    entry_route: /
+    user_interactions:
+      - View app brand and sign-in form
+      - Enter email address
+      - Enter password
+      - Toggle remember-me checkbox
+      - Click Sign in
+      - Confirm dashboard appears after successful mock login
+    api_calls: []
+    auth_required: false
+  - name: Dashboard Overview
+    description: User reviews current fund status, budget, spending, category breakdown, recent expenses, and daily allowance.
+    files:
+      - src/App.tsx
+      - src/components/OverviewPage.tsx
+      - src/components/AppHeader.tsx
+      - src/hooks/useFinance.ts
+    entry_route: /
+    user_interactions:
+      - Review amount remaining
+      - Review total budget and spent amount
+      - Review category breakdown
+      - Review recent expenses
+      - Click View All to open Expenses
+      - Click floating add button to open Expenses
+    api_calls: []
+    auth_required: true
+  - name: Fund Creation And Selection
+    description: User creates monthly or trip funds with target budgets and selects funds for tracking.
+    files:
+      - src/components/FundPanel.tsx
+      - src/hooks/useFinance.ts
+      - src/services/paymentService.ts
+      - src/lib/localStore.ts
+      - src/lib/firebase.ts
+    entry_route: /
+    user_interactions:
+      - Navigate to Budget or Trips
+      - Choose Month or Trip
+      - Enter fund name
+      - Enter target amount
+      - Click Build new month or Build new trip
+      - Select a created fund from the list
+    api_calls:
+      - method: CREATE
+        endpoint: Firestore collection paymentGroups when Firebase is configured
+      - method: LOCAL_WRITE
+        endpoint: localStorage key trip-finance-groups when Firebase is not configured
+    auth_required: true
+  - name: Payment Creation
+    description: User records an expense or saved payment against the selected fund.
+    files:
+      - src/components/PaymentPanel.tsx
+      - src/hooks/useFinance.ts
+      - src/services/paymentService.ts
+      - src/lib/localStore.ts
+      - src/lib/firebase.ts
+    entry_route: /
+    user_interactions:
+      - Navigate to Expenses
+      - Review selected fund total
+      - Enter payment name
+      - Enter amount
+      - Enter paid-by value
+      - Choose date
+      - Enter optional note
+      - Click Save payment
+      - Confirm payment appears in the payment list
+    api_calls:
+      - method: CREATE
+        endpoint: Firestore collection payments when Firebase is configured
+      - method: LOCAL_WRITE
+        endpoint: localStorage key trip-finance-payments when Firebase is not configured
+    auth_required: true
+  - name: Payment Deletion
+    description: User deletes an existing payment and totals update.
+    files:
+      - src/components/PaymentPanel.tsx
+      - src/hooks/useFinance.ts
+      - src/services/paymentService.ts
+      - src/lib/localStore.ts
+      - src/lib/firebase.ts
+    entry_route: /
+    user_interactions:
+      - Navigate to Expenses
+      - Locate an existing payment
+      - Click the delete button for that payment
+      - Confirm the payment disappears
+      - Confirm saved and remaining totals update
+    api_calls:
+      - method: DELETE
+        endpoint: Firestore document in payments collection when Firebase is configured
+      - method: LOCAL_WRITE
+        endpoint: localStorage key trip-finance-payments when Firebase is not configured
+    auth_required: true
+  - name: Bottom Navigation
+    description: User switches between Home, Expenses, Budget, and Trips sections.
+    files:
+      - src/App.tsx
+      - src/components/BottomBar.tsx
+    entry_route: /
+    user_interactions:
+      - Click Home
+      - Click Expenses
+      - Click Budget
+      - Click Trips
+      - Confirm active nav state and visible content change
+    api_calls: []
+    auth_required: true
+known_limitations:
+  - issue: Login is mock local state only and does not validate against a backend.
+    location: src/components/LoginPage.tsx
+    impact: Any non-empty credentials sign in; security/authentication tests should treat this as an intentional demo behavior.
+  - issue: The app has no route-level URLs for individual tabs.
+    location: src/App.tsx
+    impact: Test navigation must use visible UI controls rather than direct deep links.
+  - issue: Firebase is optional and absent environment values fall back to localStorage.
+    location: src/lib/firebase.ts
+    impact: Cloud database behavior is not exercised unless real Firebase environment variables are configured.

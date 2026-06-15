@@ -1,0 +1,19 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5176",
+  "loginUser": "no@gmail.cpm",
+  "loginPassword": "1234",
+  "executionArgs": {
+    "projectName": "trip_web",
+    "projectPath": "/Users/it/Documents/trip_web",
+    "testIds": [],
+    "additionalInstruction": "Use the mock login from TESTSPRITE.md: tester@example.com and Test1234. Focus on the React UI flows documented in TESTSPRITE.md.",
+    "serverMode": "development",
+    "envs": {
+      "API_KEY": "sk-user-7P_GeGUWpueOqPYGXOnZktgJqzVfeyj0_DOol5NTqdkhrR4eZ_Dyzmx70A4OZGAKoyQrAl1YZm36X6oLJLW0RjN83vW-lPy_CuVGcts3fittnQSgo00-dTYL_pxX8WzGVlg"
+    }
+  },
+  "serverPort": 52485
+}

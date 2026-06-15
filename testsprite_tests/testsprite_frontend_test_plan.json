@@ -1,0 +1,851 @@
+[
+  {
+    "id": "TC001",
+    "title": "Sign in and reach the dashboard home view",
+    "description": "This test verifies that a traveler can complete the mock sign-in flow and land on the dashboard home view with the active finance summary visible.",
+    "category": "Mock Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the dashboard home view is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the active finance summary is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Mock sign-in opens the dashboard home view",
+    "description": "This test verifies that a user can complete the mock login and land on the dashboard home view with the active finance summary visible.",
+    "category": "Bottom Navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the dashboard home view is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the active finance summary is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Bottom navigation switches between main sections",
+    "description": "This test verifies that a signed-in user can move between Home, Expenses, Budget, and Trips and see the correct section content and active state.",
+    "category": "Dashboard Overview",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Open the expenses section from the bottom navigation"
+      },
+      {
+        "type": "action",
+        "description": "Open the budget section from the bottom navigation"
+      },
+      {
+        "type": "action",
+        "description": "Open the trips section from the bottom navigation"
+      },
+      {
+        "type": "action",
+        "description": "Return to the home section from the bottom navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify each main section displays the correct content when selected"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the active navigation state follows the selected section"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Home navigation shows the overview section",
+    "description": "This test verifies that selecting Home returns the user to the dashboard overview with the home content visible.",
+    "category": "Bottom Navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Select Home from the bottom navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the home dashboard content is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the home navigation state is active"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Expenses navigation shows the payments section",
+    "description": "This test verifies that selecting Expenses opens the payments section with the expenses content visible.",
+    "category": "Bottom Navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Select Expenses from the bottom navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the expenses section is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the expenses navigation state is active"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Create a trip fund and select it for tracking",
+    "description": "This test verifies that a traveler can create a trip fund, see it added to the list, and select it as the active tracking fund.",
+    "category": "Fund Creation And Selection",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Open the trips section"
+      },
+      {
+        "type": "action",
+        "description": "Choose the trip fund mode"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the fund name with a new trip fund name"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the target amount with a valid amount"
+      },
+      {
+        "type": "action",
+        "description": "Create the new trip fund"
+      },
+      {
+        "type": "action",
+        "description": "Select the created fund from the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new trip fund appears in the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the created fund is the active tracking fund"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Navigation switches between all main sections",
+    "description": "This test verifies that the bottom navigation moves the user across Home, Expenses, Budget, and Trips with the visible content changing each time.",
+    "category": "Bottom Navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Select Home from the bottom navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select Expenses from the bottom navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select Budget from the bottom navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select Trips from the bottom navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the trips section is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the trips navigation state is active"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "Create a month fund and select it for tracking",
+    "description": "This test verifies that a household budget manager can create a month fund, see it added to the list, and select it as the active tracking fund.",
+    "category": "Fund Creation And Selection",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Open the budget section"
+      },
+      {
+        "type": "action",
+        "description": "Choose the month fund mode"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the fund name with a new month fund name"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the target amount with a valid amount"
+      },
+      {
+        "type": "action",
+        "description": "Create the new month fund"
+      },
+      {
+        "type": "action",
+        "description": "Select the created fund from the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new fund appears in the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the created fund is the active tracking fund"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "Create a payment in the selected fund",
+    "description": "This test verifies that a user can add a payment in Expenses and see the payment appear with updated saved and remaining totals.",
+    "category": "Payment Creation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Select Expenses from the bottom navigation"
+      },
+      {
+        "type": "action",
+        "description": "Enter a payment name"
+      },
+      {
+        "type": "action",
+        "description": "Enter a payment amount"
+      },
+      {
+        "type": "action",
+        "description": "Enter who paid for the payment"
+      },
+      {
+        "type": "action",
+        "description": "Choose a valid payment date"
+      },
+      {
+        "type": "action",
+        "description": "Enter an optional payment note"
+      },
+      {
+        "type": "action",
+        "description": "Save the payment"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new payment appears in the payment list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the saved and remaining totals update"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Delete an existing payment from Expenses",
+    "description": "This test verifies that a user can remove an existing payment and see the list and totals update accordingly.",
+    "category": "Payment Deletion",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Select Expenses from the bottom navigation"
+      },
+      {
+        "type": "action",
+        "description": "Locate an existing payment"
+      },
+      {
+        "type": "action",
+        "description": "Delete the selected payment"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the payment no longer appears in the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the saved and remaining totals update"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "Home view shows key budget snapshot metrics",
+    "description": "This test verifies that a signed-in user can review the essential dashboard metrics for remaining funds, spending, breakdowns, recent activity, and daily allowance.",
+    "category": "Dashboard Overview",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify remaining funds, total budget, and spent amount are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify category breakdown, recent expenses, and daily allowance are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC012",
+    "title": "Budget navigation shows the budget section",
+    "description": "This test verifies that selecting Budget opens the budget section with the budget content visible.",
+    "category": "Bottom Navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Select Budget from the bottom navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the budget section is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the budget navigation state is active"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC013",
+    "title": "Trips navigation shows the trip funds section",
+    "description": "This test verifies that selecting Trips opens the trips section with the trip content visible.",
+    "category": "Bottom Navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Select Trips from the bottom navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the trips section is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the trips navigation state is active"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC014",
+    "title": "Delete a recently created payment",
+    "description": "This test verifies that a user can create a payment and then remove it from the same session while the totals return to their prior state.",
+    "category": "Payment Deletion",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Select Expenses from the bottom navigation"
+      },
+      {
+        "type": "action",
+        "description": "Enter a payment name"
+      },
+      {
+        "type": "action",
+        "description": "Enter a payment amount"
+      },
+      {
+        "type": "action",
+        "description": "Enter who paid for the payment"
+      },
+      {
+        "type": "action",
+        "description": "Choose a valid payment date"
+      },
+      {
+        "type": "action",
+        "description": "Save the payment"
+      },
+      {
+        "type": "action",
+        "description": "Delete the newly created payment"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the payment no longer appears in the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the totals return to the previous state"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC015",
+    "title": "Create a payment with a minimal optional note setup",
+    "description": "This test verifies that a user can save a payment successfully while leaving the optional note empty.",
+    "category": "Payment Creation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Select Expenses from the bottom navigation"
+      },
+      {
+        "type": "action",
+        "description": "Enter a payment name"
+      },
+      {
+        "type": "action",
+        "description": "Enter a payment amount"
+      },
+      {
+        "type": "action",
+        "description": "Enter who paid for the payment"
+      },
+      {
+        "type": "action",
+        "description": "Choose a valid payment date"
+      },
+      {
+        "type": "action",
+        "description": "Leave the optional payment note empty"
+      },
+      {
+        "type": "action",
+        "description": "Save the payment"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new payment appears in the payment list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the totals update after saving"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC016",
+    "title": "Switch between month and trip fund creation modes",
+    "description": "This test verifies that a user can switch fund creation modes while staying in the budgeting area and see the corresponding creation form update.",
+    "category": "Fund Creation And Selection",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Open the budget section"
+      },
+      {
+        "type": "action",
+        "description": "Choose the trip fund mode"
+      },
+      {
+        "type": "action",
+        "description": "Choose the month fund mode"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the month fund creation form is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the trip fund creation form is not displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC017",
+    "title": "Remember me can be toggled during sign in",
+    "description": "This test verifies that a demo user can toggle the remember-me option before signing in and still reach the dashboard successfully.",
+    "category": "Mock Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Toggle the remember-me option"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the dashboard home view is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC018",
+    "title": "View All opens the expenses section from home",
+    "description": "This test verifies that a signed-in user can move from the home dashboard to the expenses section using the overview shortcut.",
+    "category": "Dashboard Overview",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Open the expenses section from the home overview"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the expenses section is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC019",
+    "title": "Floating add shortcut opens expenses",
+    "description": "This test verifies that a signed-in user can use the floating add shortcut to reach the expenses workflow quickly.",
+    "category": "Dashboard Overview",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Use the floating add shortcut to open expenses"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the expenses section is displayed"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC020",
+    "title": "Invalid email is rejected on sign in",
+    "description": "This test verifies that the mock login shows validation feedback when the email format is invalid and the user does not enter the dashboard.",
+    "category": "Mock Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with invalid-email"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an email validation error is visible"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC021",
+    "title": "Empty password is rejected on sign in",
+    "description": "This test verifies that the mock login shows validation feedback when the password is missing and the user does not enter the dashboard.",
+    "category": "Mock Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Leave the password field empty"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a password validation error is visible"
+      }
+    ],
+    "priority": "Low"
+  }
+]

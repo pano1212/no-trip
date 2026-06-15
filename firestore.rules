@@ -1,0 +1,127 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: newtrip
+// Document ID: Firestore auto ID
+// Fields:
+//   - type: string (required, immutable) - "month" or "trip"
+//   - name: string (required, immutable) - 1 to 120 chars
+//   - budget: number (required, immutable) - 0 to 1,000,000,000
+//   - startDate: string (required, immutable) - YYYY-MM-DD
+//   - endDate: string (required, immutable) - YYYY-MM-DD
+//   - currency: string (optional, immutable) - "LAK", "THB", or "USD"
+//   - userId: string (required, immutable) - Firebase Auth UID owner
+//   - createdAt: timestamp (required, immutable) - server timestamp
+//
+// Collection: payments
+// Document ID: Firestore auto ID
+// Fields:
+//   - groupId: string (required, immutable) - related newtrip doc ID
+//   - title: string (required, immutable) - 1 to 120 chars
+//   - amount: number (required, immutable) - > 0 and <= 1,000,000,000
+//   - paidBy: string (required, immutable) - 1 to 80 chars
+//   - date: string (required, immutable) - YYYY-MM-DD
+//   - note: string (required, immutable) - 0 to 500 chars
+//   - userId: string (required, immutable) - Firebase Auth UID owner
+//   - createdAt: timestamp (required, immutable) - server timestamp
+//
+// ===============================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isExistingOwner() {
+      return isOwner(resource.data.userId);
+    }
+
+    function hasOnlyFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function isValidString(field, minLength, maxLength) {
+      return request.resource.data[field] is string
+        && request.resource.data[field].size() >= minLength
+        && request.resource.data[field].size() <= maxLength;
+    }
+
+    function isValidCreatedAt() {
+      return request.resource.data.createdAt is timestamp
+        && request.resource.data.createdAt == request.time;
+    }
+
+    function isValidCurrency() {
+      return !("currency" in request.resource.data)
+        || request.resource.data.currency in ["LAK", "THB", "USD"];
+    }
+
+    function isValidDate(field) {
+      return request.resource.data[field] is string
+        && request.resource.data[field].matches("^\\d{4}-\\d{2}-\\d{2}$");
+    }
+
+    function isValidGroup() {
+      return hasOnlyFields(["type", "name", "budget", "startDate", "endDate", "currency", "userId", "createdAt"])
+        && hasRequiredFields(["type", "name", "budget", "startDate", "endDate", "userId", "createdAt"])
+        && isOwner(request.resource.data.userId)
+        && request.resource.data.type in ["month", "trip"]
+        && isValidString("name", 1, 120)
+        && request.resource.data.budget is number
+        && request.resource.data.budget >= 0
+        && request.resource.data.budget <= 1000000000
+        && isValidDate("startDate")
+        && isValidDate("endDate")
+        && request.resource.data.startDate <= request.resource.data.endDate
+        && isValidCurrency()
+        && isValidCreatedAt();
+    }
+
+    function isValidPayment() {
+      return hasOnlyFields(["groupId", "title", "amount", "paidBy", "date", "note", "userId", "createdAt"])
+        && hasRequiredFields(["groupId", "title", "amount", "paidBy", "date", "note", "userId", "createdAt"])
+        && isOwner(request.resource.data.userId)
+        && isValidString("groupId", 1, 160)
+        && isValidString("title", 1, 120)
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.amount <= 1000000000
+        && isValidString("paidBy", 1, 80)
+        && request.resource.data.date is string
+        && request.resource.data.date.matches("^\\d{4}-\\d{2}-\\d{2}$")
+        && isValidString("note", 0, 500)
+        && isValidCreatedAt()
+        && exists(/databases/$(database)/documents/newtrip/$(request.resource.data.groupId))
+        && get(/databases/$(database)/documents/newtrip/$(request.resource.data.groupId)).data.userId == request.auth.uid;
+    }
+
+    match /newtrip/{tripId} {
+      allow read: if isExistingOwner();
+      allow create: if isValidGroup();
+      allow update, delete: if false;
+    }
+
+    match /payments/{paymentId} {
+      allow read: if isExistingOwner();
+      allow create: if isValidPayment();
+      allow delete: if isExistingOwner();
+      allow update: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
