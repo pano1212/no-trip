@@ -1,5 +1,16 @@
 export type PaymentGroupType = "month" | "trip";
 
+export type Trip = {
+  id: string;
+  name: string;
+  destination: string;
+  startDate: string;
+  endDate: string;
+  budget: number;
+  spent: number;
+  color: string;
+}
+
 export type PaymentGroup = {
   id: string;
   type: PaymentGroupType;
@@ -7,6 +18,7 @@ export type PaymentGroup = {
   budget: number;
   startDate?: string;
   endDate?: string;
+  imageUrl?: string;
   currency?: string;
   userId?: string;
   createdAt?: unknown;
@@ -17,8 +29,10 @@ export type Payment = {
   groupId: string;
   title: string;
   amount: number;
+  category?: string;
+  currency?: string;
   paidBy: string;
-  date: string;
+  date?: string;
   note: string;
   userId?: string;
   createdAt?: unknown;

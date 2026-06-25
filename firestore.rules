@@ -10,6 +10,7 @@
 //   - budget: number (required, immutable) - 0 to 1,000,000,000
 //   - startDate: string (required, immutable) - YYYY-MM-DD
 //   - endDate: string (required, immutable) - YYYY-MM-DD
+//   - imageUrl: string (optional, immutable) - http(s) cover image URL
 //   - currency: string (optional, immutable) - "LAK", "THB", or "USD"
 //   - userId: string (required, immutable) - Firebase Auth UID owner
 //   - createdAt: timestamp (required, immutable) - server timestamp
@@ -20,8 +21,9 @@
 //   - groupId: string (required, immutable) - related newtrip doc ID
 //   - title: string (required, immutable) - 1 to 120 chars
 //   - amount: number (required, immutable) - > 0 and <= 1,000,000,000
+//   - category: string (required, immutable) - "Food", "Travel", "Shopping", "Hotel", or "Others"
+//   - currency: string (required, immutable) - "LAK", "THB", or "USD"
 //   - paidBy: string (required, immutable) - 1 to 80 chars
-//   - date: string (required, immutable) - YYYY-MM-DD
 //   - note: string (required, immutable) - 0 to 500 chars
 //   - userId: string (required, immutable) - Firebase Auth UID owner
 //   - createdAt: timestamp (required, immutable) - server timestamp
@@ -59,9 +61,8 @@ service cloud.firestore {
     }
 
     function isValidCreatedAt() {
-      return request.resource.data.createdAt is timestamp
-        && request.resource.data.createdAt == request.time;
-    }
+  return request.resource.data.createdAt is timestamp;
+}
 
     function isValidCurrency() {
       return !("currency" in request.resource.data)
@@ -73,8 +74,17 @@ service cloud.firestore {
         && request.resource.data[field].matches("^\\d{4}-\\d{2}-\\d{2}$");
     }
 
+    function isValidOptionalUrl(field) {
+      return !(field in request.resource.data)
+        || (
+          request.resource.data[field] is string
+          && request.resource.data[field].size() <= 2000
+          && request.resource.data[field].matches("^https?://.*")
+        );
+    }
+
     function isValidGroup() {
-      return hasOnlyFields(["type", "name", "budget", "startDate", "endDate", "currency", "userId", "createdAt"])
+      return hasOnlyFields(["type", "name", "budget", "startDate", "endDate", "imageUrl", "currency", "userId", "createdAt"])
         && hasRequiredFields(["type", "name", "budget", "startDate", "endDate", "userId", "createdAt"])
         && isOwner(request.resource.data.userId)
         && request.resource.data.type in ["month", "trip"]
@@ -85,22 +95,23 @@ service cloud.firestore {
         && isValidDate("startDate")
         && isValidDate("endDate")
         && request.resource.data.startDate <= request.resource.data.endDate
+        && isValidOptionalUrl("imageUrl")
         && isValidCurrency()
         && isValidCreatedAt();
     }
 
     function isValidPayment() {
-      return hasOnlyFields(["groupId", "title", "amount", "paidBy", "date", "note", "userId", "createdAt"])
-        && hasRequiredFields(["groupId", "title", "amount", "paidBy", "date", "note", "userId", "createdAt"])
+      return hasOnlyFields(["groupId", "title", "amount", "category", "currency", "paidBy", "note", "userId", "createdAt"])
+        && hasRequiredFields(["groupId", "title", "amount", "category", "currency", "paidBy", "note", "userId", "createdAt"])
         && isOwner(request.resource.data.userId)
         && isValidString("groupId", 1, 160)
         && isValidString("title", 1, 120)
         && request.resource.data.amount is number
         && request.resource.data.amount > 0
         && request.resource.data.amount <= 1000000000
+        && request.resource.data.category in ["Food", "Travel", "Shopping", "Hotel", "Others"]
+        && request.resource.data.currency in ["LAK", "THB", "USD"]
         && isValidString("paidBy", 1, 80)
-        && request.resource.data.date is string
-        && request.resource.data.date.matches("^\\d{4}-\\d{2}-\\d{2}$")
         && isValidString("note", 0, 500)
         && isValidCreatedAt()
         && exists(/databases/$(database)/documents/newtrip/$(request.resource.data.groupId))

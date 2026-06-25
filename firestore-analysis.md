@@ -17,8 +17,8 @@ Queries:
 - `payments`: `where("userId", "==", auth.currentUser.uid)`
 
 Writes:
-- Create `newtrip` with `type`, `name`, `budget`, `startDate`, `endDate`, optional `currency`, `userId`, `createdAt`.
-- Create `payments` with `groupId`, `title`, `amount`, `paidBy`, `date`, `note`, `userId`, `createdAt`.
+- Create `newtrip` with `type`, `name`, `budget`, `startDate`, `endDate`, optional `imageUrl`, optional `currency`, `userId`, `createdAt`.
+- Create `payments` with `groupId`, `title`, `amount`, `category`, `currency`, `paidBy`, `note`, `userId`, `createdAt`.
 - Delete `payments/{paymentId}`.
 
 Access model:

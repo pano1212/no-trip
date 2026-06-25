@@ -1,7 +1,9 @@
 import { useMemo } from "react";
-import { Bed, Coffee, Plus, ReceiptText, TrainFront } from "lucide-react";
+import { CloudCog, Coffee, Hotel, LucideIcon, Plus, ReceiptText, ShoppingBag, TrainFront } from "lucide-react";
+import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { Payment, PaymentGroup } from "../types/finance";
 import { currency } from "../utils/currency";
+import { formatCreatedAt } from "../utils/date";
 
 type OverviewPageProps = {
   selectedFund?: PaymentGroup;
@@ -17,16 +19,21 @@ type ExpenseRow = {
   amount: number;
   meta: string;
   status: string;
-  category: "Travel" | "Dining" | "Others";
+  category: string;
 };
 
-const categoryIcons = {
+const categoryIcons: Record<string, LucideIcon> = {
+  Food: Coffee,
   Travel: TrainFront,
   Dining: Coffee,
+  Shopping: ShoppingBag,
+  Hotel,
   Others: ReceiptText,
 };
 
-const getCategory = (title: string): "Travel" | "Dining" | "Others" => {
+const getCategory = (payment: Payment): string => {
+  if (payment.category) return payment.category;
+  const title = payment.title;
   const t = title.toLowerCase();
   if (
     t.includes("rail") ||
@@ -53,7 +60,7 @@ const getCategory = (title: string): "Travel" | "Dining" | "Others" => {
     t.includes("restaurant") ||
     t.includes("meal")
   ) {
-    return "Dining";
+    return "Food";
   }
   return "Others";
 };
@@ -73,42 +80,70 @@ export function OverviewPage({ selectedFund, payments, totalSaved, remaining, on
   const progress = budget > 0 ? Math.min((spent / budget) * 100, 100) : 0;
 
   const displayExpenses = useMemo<ExpenseRow[]>(() => {
-    return payments.slice(0, 3).map((payment) => {
-      const category = getCategory(payment.title);
+    const filteredPayments = selectedFund
+      ? payments.filter((p) => p.groupId === selectedFund.id)
+      : payments;
+
+    return filteredPayments.slice(0, 3).map((payment) => {
+      const category = getCategory(payment);
       return {
         id: payment.id,
         title: payment.title,
         amount: payment.amount,
-        meta: `${payment.date} • ${payment.paidBy}`,
+        meta: `${formatCreatedAt(payment.createdAt)}`,
         status: payment.note ? "Pending" : "Confirmed",
         category,
       };
     });
-  }, [payments]);
+  }, [payments, selectedFund]);
+
+  // console.log(selectedFund, 'selectFund')
+  // console.log(payments, 'payment')
 
   const categoryTotals = useMemo(() => {
-    let travel = 0;
-    let dining = 0;
-    let others = 0;
+    const items = [
+      { label: "Food", amount: 0, color: "#0f9f8f" },
+      { label: "Travel", amount: 0, color: "#007b80" },
+      { label: "Shopping", amount: 0, color: "#3e6470" },
+      { label: "Hotel", amount: 0, color: "#4f7fb0" },
+      { label: "Others", amount: 0, color: "#a7d1f5" },
+    ];
 
-    payments.forEach((payment) => {
-      const cat = getCategory(payment.title);
-      if (cat === "Travel") travel += payment.amount;
-      else if (cat === "Dining") dining += payment.amount;
-      else others += payment.amount;
+    const filteredPayments = selectedFund
+      ? payments.filter((p) => p.groupId === selectedFund.id)
+      : payments;
+
+    filteredPayments.forEach((payment) => {
+      const cat = getCategory(payment);
+      const item = items.find((entry) => entry.label === cat);
+      if (item) item.amount += payment.amount;
+      else items[items.length - 1].amount += payment.amount;
     });
 
-    const total = travel + dining + others;
-    if (total === 0) {
-      return { travelPct: 0, diningPct: 0, othersPct: 0 };
-    }
+    const total = items.reduce((sum, item) => sum + item.amount, 0);
+    let remainingPct = 100;
+    const breakdown = items.map((item, index) => {
+      const percent =
+        total === 0 ? 0 : index === items.length - 1 ? remainingPct : Math.round((item.amount / total) * 100);
+      remainingPct -= percent;
+      return { ...item, percent };
+    });
 
-    const travelPct = Math.round((travel / total) * 100);
-    const diningPct = Math.round((dining / total) * 100);
-    const othersPct = 100 - travelPct - diningPct;
+    const pieData =
+      total === 0
+        ? [{ name: "No spending", value: 1, amount: 0, percent: 0, color: "#edf4f6" }]
+        : breakdown.map((item) => ({
+          name: item.label,
+          value: item.amount,
+          amount: item.amount,
+          percent: item.percent,
+          color: item.color,
+        }));
 
-    return { travelPct, diningPct, othersPct };
-  }, [payments]);
+    return { total, breakdown, pieData };
+  }, [payments, selectedFund]);
+
+  console.log(categoryTotals, 'categoryTotals')
 
   return (
     <section className="grid gap-4">
@@ -141,47 +176,98 @@ export function OverviewPage({ selectedFund, payments, totalSaved, remaining, on
       </article>
 
       <article className="rounded-3xl bg-white/95 p-4 shadow-[0_4px_12px_rgba(43,52,54,0.06)] max-[520px]:rounded-[22px]">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-display text-[clamp(1rem,3.5vw,1.15rem)] font-black text-[#162225]">
-            Category Breakdown
-          </h2>
-          <span className="text-xs font-black uppercase text-primary">
-            {new Date().toLocaleString("en-US", { month: "long" })}
-          </span>
-        </div>
+        <p className="mb-4 text-sm font-black text-[#162225]">Spending by Category</p>
+        <div className="flex items-center gap-4">
+          <div className="relative h-30 w-30 shrink-0">
+            <ResponsiveContainer width={120} height={120}>
+              <PieChart>
+                <Pie
+                  data={categoryTotals.pieData}
+                  cx={55}
+                  cy={55}
+                  innerRadius={35}
+                  outerRadius={55}
+                  dataKey="value"
+                  strokeWidth={0}
+                  isAnimationActive
+                  animationBegin={120}
+                  animationDuration={900}
+                  animationEasing="ease-out"
+                >
+                  {categoryTotals.total > 0 &&
+                    categoryTotals.pieData.map((entry, index) => (
+                      <Cell key={`${entry.name}-${index}`} fill={entry.color} />
+                    ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+              <p className="text-[10px] font-bold text-[#566164]">Total</p>
+              <p className="max-w-18 truncate text-xs font-black text-[#162225]">
+                {currency.format(categoryTotals.total, selectedFund?.currency)}
+              </p>
+            </div>
+          </div>
 
-        <div className="mt-4 grid grid-cols-[92px_minmax(0,1fr)] items-center gap-4 max-[520px]:grid-cols-1 max-[520px]:justify-items-center">
-          <div
-            className="grid aspect-square w-22 place-items-center rounded-full before:col-start-1 before:row-start-1 before:aspect-square before:w-[72%] before:rounded-full before:bg-white before:content-['']"
-            aria-label={`Travel ${categoryTotals.travelPct}%, Dining ${categoryTotals.diningPct}%, Others ${categoryTotals.othersPct}%`}
-            style={{
-              background:
-                categoryTotals.travelPct === 0 && categoryTotals.diningPct === 0 && categoryTotals.othersPct === 0
-                  ? "#edf4f6"
-                  : `conic-gradient(#007b80 0 ${categoryTotals.travelPct}%, #3e6470 ${categoryTotals.travelPct}% ${categoryTotals.travelPct + categoryTotals.diningPct}%, #a7d1f5 ${categoryTotals.travelPct + categoryTotals.diningPct}% 100%)`
-            }}
-          >
-            <span className="z-1 col-start-1 row-start-1 text-sm font-black text-[#007b80]">
-              {categoryTotals.travelPct}%
-            </span>
-          </div>
-          <div className="grid gap-2.5 max-[520px]:w-full">
-            <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#007b80]" />
-              <p className="text-sm font-bold text-[#182326]">Travel</p>
-              <strong className="text-sm font-bold text-[#182326]">{categoryTotals.travelPct}%</strong>
+          {/* <div className="flex min-w-0 flex-1 flex-col gap-2">
+            {categoryTotals.breakdown.map((item) => (
+              item.amount > 0 && (
+                <div
+                  className="flex items-center justify-between gap-2 transition-transform duration-200 hover:translate-x-1"
+                  key={item.label}
+                >
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+                    <span className="truncate text-xs font-bold text-[#566164]">{item.label}</span>
+                  </div>
+                  <span className="shrink-0 text-xs font-black text-[#162225]">
+                    {currency.format(item.amount, selectedFund?.currency)}
+                  </span>
+                </div>
+              )))}
+          </div> */}
+
+          {categoryTotals.total > 0 ? (
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              {categoryTotals.breakdown?.map((item) => (
+                item.amount > 0 && (
+
+                  <div
+                    key={item.label}
+                    className="flex items-center justify-between gap-2 transition-transform duration-200 hover:translate-x-1"
+                  >
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span
+                        className="h-2 w-2 shrink-0 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="truncate text-xs font-bold text-[#566164]">
+                        {item.label}
+                      </span>
+                    </div>
+
+                    <span className="shrink-0 text-xs font-black text-[#162225]">
+                      {currency.format(item.amount, selectedFund?.currency)}
+                    </span>
+                  </div>
+                )
+              ))}
             </div>
-            <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-secondary" />
-              <p className="text-sm font-bold text-[#182326]">Dining</p>
-              <strong className="text-sm font-bold text-[#182326]">{categoryTotals.diningPct}%</strong>
+          ) : (
+            <div
+              className="flex items-center justify-between gap-2"
+            >
+              <div className="flex min-w-0 items-center gap-2">
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: 'gray' }}
+                />
+                <span className="truncate text-xs font-bold text-gray-400">
+                  ADD YOUR EXPENSE
+                </span>
+              </div>
             </div>
-            <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#a7d1f5]" />
-              <p className="text-sm font-bold text-[#182326]">Others</p>
-              <strong className="text-sm font-bold text-[#182326]">{categoryTotals.othersPct}%</strong>
-            </div>
-          </div>
+          )}
         </div>
       </article>
 
@@ -215,9 +301,7 @@ export function OverviewPage({ selectedFund, payments, totalSaved, remaining, on
                     {expense.status}
                   </span>
                 </div>
-
               </div>
-
             </article>
           );
         })}

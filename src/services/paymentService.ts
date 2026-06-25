@@ -1,4 +1,4 @@
-import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, onSnapshot, query, serverTimestamp, where } from "firebase/firestore";
 import { db, auth } from "../lib/firebase";
 import { readLocal, watchLocal, writeLocal } from "../lib/localStore";
 import { Listener, NewPayment, NewPaymentGroup, Payment, PaymentGroup } from "../types/finance";
@@ -8,10 +8,9 @@ const localKey = {
   payments: "trip-finance-payments",
 };
 
-export const subscribeGroups = (listener: Listener<PaymentGroup>) => {
+export const subscribeGroups = (userId: string, listener: Listener<PaymentGroup>) => {
   if (!db) return watchLocal<PaymentGroup>(localKey.groups, listener);
 
-  const userId = auth?.currentUser?.uid || "";
   const groupsQuery = query(collection(db, "newtrip"), where("userId", "==", userId));
   return onSnapshot(groupsQuery, (snapshot) => {
     const items = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as PaymentGroup);
@@ -24,12 +23,11 @@ export const subscribeGroups = (listener: Listener<PaymentGroup>) => {
   });
 };
 
-export const subscribePayments = (listener: Listener<Payment>) => {
+export const subscribePayments = (userId: string, listener: Listener<Payment>) => {
   if (!db) return watchLocal<Payment>(localKey.payments, listener);
 
-  const userId = auth?.currentUser?.uid || "";
-  const paymentsQuery = query(collection(db, "payments"), where("userId", "==", userId));
-  return onSnapshot(paymentsQuery, (snapshot) => {
+  const groupsQuery = query(collection(db, "payments"), where("userId", "==", userId));
+  return onSnapshot(groupsQuery, (snapshot) => {
     const items = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as Payment);
     items.sort((a, b) => {
       const tA = (a.createdAt as any)?.seconds || 0;

@@ -2,6 +2,7 @@ import { LogOut, Plus, ReceiptText, WalletCards, X } from "lucide-react";
 import { AppView } from "./BottomBar";
 import { Payment, PaymentGroupWithTotal } from "../types/finance";
 import { currency } from "../utils/currency";
+import { formatCreatedAt } from "../utils/date";
 
 type HistorySidebarProps = {
   isOpen: boolean;
@@ -105,7 +106,7 @@ export function HistorySidebar({
             {!funds.length && <p className="px-3 py-2 text-sm font-bold text-ink-muted">No saved funds yet.</p>}
           </section>
 
-          <section className="mt-6 grid gap-1">
+          {/* <section className="mt-6 grid gap-1">
             <p className="px-2 pb-1 text-xs font-black uppercase tracking-widest text-ink-muted">Recent payments</p>
             {recentPayments.map((payment) => (
               <button
@@ -119,12 +120,12 @@ export function HistorySidebar({
                   <strong className="truncate text-sm">{payment.title}</strong>
                 </span>
                 <span className="text-xs font-bold text-ink-muted">
-                  {payment.date} · {currency.format(payment.amount, funds.find((f) => f.id === payment.groupId)?.currency)}
+                  {formatCreatedAt(payment.createdAt)} · {currency.format(payment.amount, payment.currency || funds.find((f) => f.id === payment.groupId)?.currency)}
                 </span>
               </button>
             ))}
             {!recentPayments.length && <p className="px-3 py-2 text-sm font-bold text-ink-muted">No saved payments yet.</p>}
-          </section>
+          </section> */}
         </div>
 
         <div className="mt-4 border-t border-black/5 pt-3">

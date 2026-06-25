@@ -3,19 +3,20 @@ import { createGroup, createPayment, removePayment, subscribeGroups, subscribePa
 import { getTodayInputValue } from "../utils/date";
 import { NewPayment, NewPaymentGroup, Payment, PaymentGroup } from "../types/finance";
 
-export function useFinance() {
+export function useFinance(userId: string) {
   const [groups, setGroups] = useState<PaymentGroup[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState("");
 
   useEffect(() => {
-    const stopGroups = subscribeGroups(setGroups);
-    const stopPayments = subscribePayments(setPayments);
+    if (!userId) return;
+    const stopGroups = subscribeGroups(userId, setGroups);
+    const stopPayments = subscribePayments(userId, setPayments);
     return () => {
       stopGroups();
       stopPayments();
     };
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     if (!selectedGroupId && groups[0]) {

@@ -11,6 +11,7 @@ import { PaymentPanel } from "./components/PaymentPanel";
 import { RegisterPage } from "./components/RegisterPage";
 import { useFinance } from "./hooks/useFinance";
 import { auth } from "./lib/firebase";
+import { TripsScreen } from "./components/Trip";
 
 export function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -62,11 +63,12 @@ export function App() {
     return <LoginPage onForgotPassword={() => setAuthPage("forgot-password")} onRegister={() => setAuthPage("register")} />;
   }
 
-  return <DashboardApp />;
+  return <DashboardApp user={user} />;
 }
 
-function DashboardApp() {
-  const finance = useFinance();
+
+function DashboardApp({ user }: { user: User }) {
+  const finance = useFinance(user.uid);
   const [activeView, setActiveView] = useState<AppView>("home");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -88,7 +90,7 @@ function DashboardApp() {
         }}
       />
 
-      {activeView !== "trips" && (
+      {activeView !== "expenses" && activeView !== "addtrip" && (
         <AppHeader
           onOpenSidebar={() => setIsSidebarOpen(true)}
           fund={finance.selectedGroup}
@@ -106,13 +108,17 @@ function DashboardApp() {
       )}
 
       {activeView === "trips" && (
-        <FundPanel
-          funds={finance.groupedTotals}
-          selectedFundId={finance.selectedGroupId}
-          onCreateFund={finance.addGroup}
+        <TripsScreen trips={finance.groupedTotals}
           onSelectFund={finance.setSelectedGroupId}
-          onClose={() => setActiveView("home")}
-        />
+          onChangeView={() => setActiveView("home")}
+          onAddExpense={() => setActiveView("addtrip")}></TripsScreen>
+        // <FundPanel
+        //   funds={finance.groupedTotals}
+        //   selectedFundId={finance.selectedGroupId}
+        //   onCreateFund={finance.addGroup}
+        //   onSelectFund={finance.setSelectedGroupId}
+        //   onClose={() => setActiveView("home")}
+        // />
       )}
 
       {/* {activeView === "budget" && (
@@ -133,10 +139,24 @@ function DashboardApp() {
           defaultDate={finance.defaultPaymentDate}
           onCreatePayment={finance.addPayment}
           onRemovePayment={finance.removePayment}
+          onClose={() => setActiveView("home")}
+        />
+      )}
+      {activeView === "addtrip" && (
+        <FundPanel
+          funds={finance.groupedTotals}
+          selectedFundId={finance.selectedGroupId}
+          onCreateFund={finance.addGroup}
+          onSelectFund={finance.setSelectedGroupId}
+          onClose={() => setActiveView("trips")}
         />
       )}
 
-      <BottomBar activeView={activeView} onChangeView={setActiveView} />
+      {activeView !== "expenses" && (
+        <BottomBar activeView={activeView} onChangeView={setActiveView} />
+      )}
+
+
     </main>
   );
 }

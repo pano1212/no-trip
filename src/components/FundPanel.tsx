@@ -1,15 +1,18 @@
 import { FormEvent, useMemo, useState } from "react";
 import { ArrowLeft, Camera, CalendarDays, ChartNoAxesColumn, PlaneTakeoff } from "lucide-react";
-import { NewPaymentGroup, PaymentGroupWithTotal } from "../types/finance";
+import { NewPaymentGroup, PaymentGroup, PaymentGroupWithTotal } from "../types/finance";
 import { currency as formatCurrency } from "../utils/currency";
 import { getDateOffsetInputValue, getTodayInputValue } from "../utils/date";
+import { PageHeader } from "./BackButton";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { storage } from "../lib/firebase";
 
 type FundPanelProps = {
   funds: PaymentGroupWithTotal[];
   selectedFundId: string;
   onCreateFund: (fund: NewPaymentGroup) => Promise<void>;
   onSelectFund: (fundId: string) => void;
-  onClose?: () => void;
+  onClose: () => void;
 };
 
 const coverImageUrl =
@@ -17,6 +20,8 @@ const coverImageUrl =
 
 export function FundPanel({ onCreateFund, onClose }: FundPanelProps) {
   const [tripName, setTripName] = useState("");
+  const [imageUrl, setImageUrl] = useState('');
+  const [file, setfile] = useState<File | null>(null);
   const [dateRange, setDateRange] = useState("");
   const [budget, setBudget] = useState("");
   const [currency, setCurrency] = useState("LAK");
@@ -30,6 +35,19 @@ export function FundPanel({ onCreateFund, onClose }: FundPanelProps) {
     const trimmedName = tripName.trim();
     if (!trimmedName) return;
 
+    // if (!file) {
+    //   return;
+    // }
+
+    // const imageRef = ref(
+    //   storage,
+    //   `trip-covers/${Date.now()}-${file?.name}`
+    // );
+
+    // await uploadBytes(imageRef, file);
+
+    // const Url = await getDownloadURL(imageRef);
+
     setIsSubmitting(true);
     try {
       await onCreateFund({
@@ -38,9 +56,12 @@ export function FundPanel({ onCreateFund, onClose }: FundPanelProps) {
         budget: numericBudget,
         startDate: getTodayInputValue(),
         endDate: getDateOffsetInputValue(10),
+        imageUrl: imageUrl.trim() || coverImageUrl,
         currency,
       });
       setTripName("");
+      setImageUrl('');
+      setfile(null);
       setDateRange("");
       setBudget("");
       onClose?.();
@@ -48,45 +69,69 @@ export function FundPanel({ onCreateFund, onClose }: FundPanelProps) {
       setIsSubmitting(false);
     }
   };
+  const handleImageChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setfile(file);
+    const previewUrl = URL.createObjectURL(file);
+    setImageUrl(previewUrl);
+  };
 
   return (
-    <section className="-mx-5 -mt-4 min-h-screen bg-surface pb-22 text-ink max-[520px]:-mx-4">
-      <header className="sticky top-0 z-10 flex h-16 items-center justify-center bg-white/80 px-6 shadow-sm backdrop-blur-md">
-        <div className="flex text-center">
-          {/* <button
-            className="grid h-10 w-10 place-items-center rounded-full border-0 bg-transparent text-primary transition-opacity hover:opacity-80 active:scale-95"
-            type="button"
-            aria-label="Close create trip"
-            onClick={onClose}
-          >
-            <ArrowLeft size={22} />
-          </button> */}
-          <h1 className="font-display text-xl font-bold tracking-tight text-primary">New Trip</h1>
-        </div>
-      </header>
+    <section className="mx-5 min-h-screen bg-surface text-ink max-[520px]:-mx-4">
+      <PageHeader
+        title={'Create New Trip'}
+        onBack={onClose} />
 
-      <form id="create-trip-form" className="mx-auto grid max-w-2xl gap-8 px-6 pt-4" onSubmit={submitTrip}>
-        <section className="grid gap-6">
+      <form id="create-trip-form" className="mx-auto grid max-w-2xl gap-8 px-6" onSubmit={submitTrip}>
+        <section className="grid gap-3">
           <div className="grid gap-1">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted">Start your journey</p>
-            <h2 className="font-display text-3xl font-extrabold tracking-tight text-ink">Design Your Adventure</h2>
+            {/* <h2 className="font-display text-3xl font-extrabold tracking-tight text-ink">Design Your Adventure</h2> */}
           </div>
 
-          <div className="group relative h-48 w-full cursor-pointer overflow-hidden rounded-3xl bg-surface-high transition-transform duration-300 active:scale-[0.98]">
+          <label
+            htmlFor="cover-upload"
+            className="group relative block h-48 w-full cursor-pointer overflow-hidden rounded-3xl bg-surface-high transition-transform duration-300 active:scale-[0.98]"
+          >
+            <input
+              id="cover-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageChange}
+            />
+
             <img
               alt="Trip cover"
               className="h-full w-full object-cover opacity-80 transition-opacity duration-500 group-hover:opacity-100"
-              src={coverImageUrl}
+              src={imageUrl.trim() || coverImageUrl}
             />
+
             <div className="absolute inset-0 bg-linear-to-t from-ink/40 to-transparent" />
+
             <div className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-white backdrop-blur-md">
               <Camera size={14} />
               <span className="text-xs font-semibold">Change Cover</span>
             </div>
-          </div>
+          </label>
         </section>
 
         <section className="grid gap-8">
+           <label className="gap-3">
+            <span className="ml-1 text-sm font-semibold uppercase text-ink-muted">Cover image URL</span>
+            <input
+              className="min-h-14 rounded-2xl border-0 bg-surface-highest px-5 text-ink placeholder:text-outline focus:border-transparent focus:ring-2 focus:ring-primary/40"
+              placeholder="https://example.com/trip-cover.jpg"
+              type="url"
+              value={imageUrl}
+              onChange={(event) => setImageUrl(event.target.value)}
+            />
+          </label>
+
+
           <label className="gap-3">
             <span className="ml-1 text-sm font-semibold uppercase text-ink-muted">Trip name</span>
             <input
@@ -169,7 +214,7 @@ export function FundPanel({ onCreateFund, onClose }: FundPanelProps) {
         </p>
       </form>
 
-      <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 px-6 pb-28">
+      <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 px-6">
         <button
           className="flex min-h-16 w-full items-center justify-center gap-2 rounded-3xl border-0 bg-linear-to-br from-primary to-primary-dim px-5 font-display text-lg font-bold text-white shadow-[0_8px_30px_rgb(0,106,113,0.15)] transition-transform duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           type="submit"
