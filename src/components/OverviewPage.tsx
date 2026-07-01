@@ -11,6 +11,7 @@ type OverviewPageProps = {
   totalSaved: number;
   remaining: number;
   onAddExpense: () => void;
+  onOpenViewALl : () => void;
 };
 
 type ExpenseRow = {
@@ -73,7 +74,7 @@ const allowanceCardClass =
 const floatingAddButtonClass =
   "fixed bottom-23 z-30 grid h-13 w-13 place-items-center rounded-full border-0 bg-[#007b80] text-white shadow-[0_7px_16px_rgba(0,106,113,0.24)] transition-transform hover:scale-105 active:scale-95 max-[520px]:right-4 min-[521px]:right-[max(16px,calc((100vw-640px)/2+16px))]";
 
-export function OverviewPage({ selectedFund, payments, totalSaved, remaining, onAddExpense }: OverviewPageProps) {
+export function OverviewPage({ selectedFund, payments, totalSaved, remaining, onAddExpense,onOpenViewALl }: OverviewPageProps) {
   const budget = selectedFund?.budget ?? 0;
   const spent = totalSaved || 0;
   const amountRemaining = selectedFund ? remaining : 0;
@@ -273,7 +274,7 @@ export function OverviewPage({ selectedFund, payments, totalSaved, remaining, on
 
       <div className="-mb-1 flex items-center justify-between gap-3 px-1">
         <h2 className="font-display text-[clamp(1rem,3.5vw,1.15rem)] font-black text-[#162225]">Recent Expenses</h2>
-        <button className="border-0 bg-transparent text-xs font-black text-primary" type="button" onClick={onAddExpense}>
+        <button className="border-0 bg-transparent text-xs font-black text-primary" type="button" onClick={onOpenViewALl}>
           View All
         </button>
       </div>

@@ -12,6 +12,8 @@ import { RegisterPage } from "./components/RegisterPage";
 import { useFinance } from "./hooks/useFinance";
 import { auth } from "./lib/firebase";
 import { TripsScreen } from "./components/Trip";
+import ProfilePage from "./components/Profile";
+import ViewAll from "./components/viewAll";
 
 export function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -71,7 +73,6 @@ function DashboardApp({ user }: { user: User }) {
   const finance = useFinance(user.uid);
   const [activeView, setActiveView] = useState<AppView>("home");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   return (
     <main className="mx-auto min-h-screen w-full max-w-160 px-5 pb-28 pt-4 max-[520px]:px-4">
       <HistorySidebar
@@ -93,6 +94,7 @@ function DashboardApp({ user }: { user: User }) {
       {activeView !== "expenses" && activeView !== "addtrip" && (
         <AppHeader
           onOpenSidebar={() => setIsSidebarOpen(true)}
+          onOpenProfile={() => setActiveView("profile")}
           fund={finance.selectedGroup}
         />
       )}
@@ -104,6 +106,7 @@ function DashboardApp({ user }: { user: User }) {
           totalSaved={finance.totalSaved}
           remaining={finance.remaining}
           onAddExpense={() => setActiveView("expenses")}
+          onOpenViewALl={() => setActiveView("viewall")}
         />
       )}
 
@@ -121,14 +124,9 @@ function DashboardApp({ user }: { user: User }) {
         // />
       )}
 
-      {/* {activeView === "budget" && (
-        <FundPanel
-          funds={finance.groupedTotals}
-          selectedFundId={finance.selectedGroupId}
-          onCreateFund={finance.addGroup}
-          onSelectFund={finance.setSelectedGroupId}
-        />
-      )} */}
+      {activeView === "profile" && (
+        <ProfilePage />
+      )}
 
       {activeView === "expenses" && (
         <PaymentPanel
@@ -150,6 +148,14 @@ function DashboardApp({ user }: { user: User }) {
           onSelectFund={finance.setSelectedGroupId}
           onClose={() => setActiveView("trips")}
         />
+      )}
+
+      {activeView === "viewall" && (
+        <ViewAll
+          funds={finance.groupedTotals}
+          onChangeView={() => setActiveView("expenses")}
+          onSelectFund={finance.setSelectedGroupId}
+          payments={finance.payments} />
       )}
 
       {activeView !== "expenses" && (

@@ -1,6 +1,6 @@
-import { Compass, Home, MountainIcon, SearchCheck } from "lucide-react";
+import { Compass, Home, MountainIcon, SearchCheck, User } from "lucide-react";
 
-export type AppView = "home" | "expenses" | "budget" | "trips" | "addtrip";
+export type AppView = "home" | "expenses" | "profile" | "trips" | "addtrip" | "viewall";
 
 type BottomBarProps = {
   activeView: AppView;
@@ -10,7 +10,8 @@ type BottomBarProps = {
 const items = [
   { id: "home", label: "Home", icon: Home },
   { id: "trips", label: "Trips", icon: MountainIcon },
-  { id: "budget", label: "Budget", icon: SearchCheck },
+  // { id: "trips", label: "Trips", icon: MountainIcon },
+  { id: "profile", label: "Profile", icon: User },
 ] satisfies Array<{ id: AppView; label: string; icon: typeof Home }>;
 
 export function BottomBar({ activeView, onChangeView }: BottomBarProps) {

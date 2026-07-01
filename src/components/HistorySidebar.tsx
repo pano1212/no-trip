@@ -71,7 +71,7 @@ export function HistorySidebar({
           </button>
         </div>
 
-        <button
+        {/* <button
           className="mb-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-primary/10 bg-white px-3 font-black text-primary shadow-[0_4px_12px_rgba(43,52,54,0.05)]"
           type="button"
           onClick={() => {
@@ -81,7 +81,7 @@ export function HistorySidebar({
         >
           <Plus size={18} />
           New expense
-        </button>
+        </button> */}
 
         <div className="min-h-0 overflow-y-auto pr-1">
           <section className="grid gap-1">

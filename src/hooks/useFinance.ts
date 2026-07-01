@@ -28,7 +28,7 @@ export function useFinance(userId: string) {
   const selectedPayments = payments.filter((payment) => payment.groupId === selectedGroupId);
   const totalSaved = selectedPayments.reduce((sum, payment) => sum + payment.amount, 0);
   const allSaved = payments.reduce((sum, payment) => sum + payment.amount, 0);
-  const remaining = Math.max((selectedGroup?.budget ?? 0) - totalSaved, 0);
+  const remaining = (selectedGroup?.budget ?? 0) - totalSaved;
 
   const groupedTotals = useMemo(
     () =>
