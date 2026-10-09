@@ -17,7 +17,7 @@ export function PageHeader({ title, onBack }: PageHeaderProps) {
                 <ChevronLeft size={25} />
             </button>
 
-            <h1 className="flex-1 font-display text-[clamp(1.25rem,4vw,1.55rem)] font-black leading-none text-primary">
+            <h1 className="min-w-0 flex-1 truncate font-display text-[clamp(1.25rem,4vw,1.55rem)] font-black leading-none text-primary">
                 {title}
             </h1>
         </div>

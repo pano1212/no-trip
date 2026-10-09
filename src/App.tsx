@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { User, onAuthStateChanged, signOut } from "firebase/auth";
 import { AppView, BottomBar } from "./components/BottomBar";
 import { AppHeader } from "./components/AppHeader";
+import { AppBootScreen } from "./components/AppBootScreen";
 import { FundPanel } from "./components/FundPanel";
 import { ForgotPasswordPage } from "./components/ForgotPasswordPage";
 import { HistorySidebar } from "./components/HistorySidebar";
@@ -14,6 +15,7 @@ import { auth } from "./lib/firebase";
 import { TripsScreen } from "./components/Trip";
 import ProfilePage from "./components/Profile";
 import ViewAll from "./components/viewAll";
+import { PaymentGroup } from "./types/finance";
 
 export function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -36,21 +38,7 @@ export function App() {
   }, []);
 
   if (isCheckingAuth) {
-    return (
-      <main className="mx-auto grid min-h-screen w-full max-w-160 items-center px-6.5 py-7 max-[640px]:px-4.5 max-[640px]:py-6">
-        <section
-          className="grid gap-7 rounded-[42px] bg-white/80 p-7 shadow-[0_8px_24px_rgba(43,52,54,0.08)] backdrop-blur-[20px] max-[520px]:rounded-[34px]"
-          aria-label="Loading authentication"
-        >
-          <div className="mb-1.5">
-            <p className="text-[0.82rem] font-black uppercase tracking-widest text-[#687477]">Trip finance</p>
-            <h2 className="mt-2 font-display text-[clamp(1.55rem,5vw,1.9rem)] font-black text-[#162225]">
-              Checking session
-            </h2>
-          </div>
-        </section>
-      </main>
-    );
+    return <AppBootScreen label="Checking your session" />;
   }
 
   if (!user) {
@@ -73,6 +61,7 @@ function DashboardApp({ user }: { user: User }) {
   const finance = useFinance(user.uid);
   const [activeView, setActiveView] = useState<AppView>("home");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [tripBeingEdited, setTripBeingEdited] = useState<PaymentGroup | null>(null);
   return (
     <main className="mx-auto min-h-screen w-full max-w-160 px-5 pb-28 pt-4 max-[520px]:px-4">
       <HistorySidebar
@@ -91,7 +80,10 @@ function DashboardApp({ user }: { user: User }) {
         }}
       />
 
-      {activeView !== "expenses" && activeView !== "addtrip" && (
+      {activeView !== "expenses" &&
+        activeView !== "addtrip" &&
+        activeView !== "viewall" &&
+        activeView !== "profile" && (
         <AppHeader
           onOpenSidebar={() => setIsSidebarOpen(true)}
           onOpenProfile={() => setActiveView("profile")}
@@ -111,21 +103,38 @@ function DashboardApp({ user }: { user: User }) {
       )}
 
       {activeView === "trips" && (
-        <TripsScreen trips={finance.groupedTotals}
+        <TripsScreen
+          trips={finance.groupedTotals}
           onSelectFund={finance.setSelectedGroupId}
           onChangeView={() => setActiveView("home")}
-          onAddExpense={() => setActiveView("addtrip")}></TripsScreen>
-        // <FundPanel
-        //   funds={finance.groupedTotals}
-        //   selectedFundId={finance.selectedGroupId}
-        //   onCreateFund={finance.addGroup}
-        //   onSelectFund={finance.setSelectedGroupId}
-        //   onClose={() => setActiveView("home")}
-        // />
+          onAddExpense={() => {
+            setTripBeingEdited(null);
+            setActiveView("addtrip");
+          }}
+          onEditTrip={(trip) => {
+            setTripBeingEdited(trip);
+            finance.setSelectedGroupId(trip.id);
+            setActiveView("addtrip");
+          }}
+          onDeleteTrip={finance.removeGroup}
+        />
       )}
 
       {activeView === "profile" && (
-        <ProfilePage />
+        <ProfilePage
+          user={user}
+          tripCount={finance.groupedTotals.length}
+          expenseCount={finance.payments.length}
+          totalSpent={finance.allSaved}
+          totalBudget={finance.groupedTotals.reduce((sum, trip) => sum + (trip.budget || 0), 0)}
+          preferredCurrency={finance.selectedGroup?.currency}
+          onChangeView={setActiveView}
+          onLogout={async () => {
+            if (auth) {
+              await signOut(auth);
+            }
+          }}
+        />
       )}
 
       {activeView === "expenses" && (
@@ -135,6 +144,7 @@ function DashboardApp({ user }: { user: User }) {
           payments={finance.selectedPayments}
           totalSaved={finance.totalSaved}
           defaultDate={finance.defaultPaymentDate}
+          defaultTime={finance.defaultPaymentTime}
           onCreatePayment={finance.addPayment}
           onRemovePayment={finance.removePayment}
           onClose={() => setActiveView("home")}
@@ -144,21 +154,26 @@ function DashboardApp({ user }: { user: User }) {
         <FundPanel
           funds={finance.groupedTotals}
           selectedFundId={finance.selectedGroupId}
+          tripToEdit={tripBeingEdited ?? undefined}
           onCreateFund={finance.addGroup}
+          onUpdateFund={finance.updateGroup}
           onSelectFund={finance.setSelectedGroupId}
-          onClose={() => setActiveView("trips")}
+          onClose={() => {
+            setTripBeingEdited(null);
+            setActiveView("trips");
+          }}
         />
       )}
 
       {activeView === "viewall" && (
         <ViewAll
-          funds={finance.groupedTotals}
-          onChangeView={() => setActiveView("expenses")}
-          onSelectFund={finance.setSelectedGroupId}
-          payments={finance.payments} />
+          selectedFund={finance.selectedGroup}
+          payments={finance.selectedPayments}
+          onBack={() => setActiveView("home")}
+        />
       )}
 
-      {activeView !== "expenses" && (
+      {activeView !== "expenses" && activeView !== "addtrip" && (
         <BottomBar activeView={activeView} onChangeView={setActiveView} />
       )}
 

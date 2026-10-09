@@ -55,3 +55,28 @@
     @apply min-h-11 w-full rounded-lg border border-primary/10 bg-surface-highest px-3 text-ink outline-none focus:border-primary/40;
   }
 }
+
+@keyframes boot-dot-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.28;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+.boot-dot {
+  animation: boot-dot-pulse 1.05s ease-in-out infinite;
+}
+
+.boot-dot-delay-1 {
+  animation-delay: 0.15s;
+}
+
+.boot-dot-delay-2 {
+  animation-delay: 0.3s;
+}

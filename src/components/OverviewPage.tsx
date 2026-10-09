@@ -1,9 +1,16 @@
 import { useMemo } from "react";
-import { CloudCog, Coffee, Hotel, LucideIcon, Plus, ReceiptText, ShoppingBag, TrainFront } from "lucide-react";
-import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { Coffee, Hotel, LucideIcon, Plus, ReceiptText, ShoppingBag, TrainFront } from "lucide-react";
+import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Payment, PaymentGroup } from "../types/finance";
 import { currency } from "../utils/currency";
-import { formatCreatedAt } from "../utils/date";
+import {
+  eachDayInRange,
+  formatCreatedAt,
+  formatDayLabel,
+  formatPaymentWhenLabel,
+  getPaymentDayKey,
+  splitHotelStayAmount,
+} from "../utils/date";
 
 type OverviewPageProps = {
   selectedFund?: PaymentGroup;
@@ -69,8 +76,6 @@ const budgetCardClass =
   "rounded-3xl bg-white/95 px-5 pb-5 pt-5 text-center shadow-[0_4px_12px_rgba(43,52,54,0.06)] max-[520px]:rounded-[22px] max-[520px]:px-4 max-[520px]:py-5";
 const expenseCardClass =
   "grid min-h-16 grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 rounded-[22px] bg-white/95 px-3.5 py-3 shadow-[0_3px_10px_rgba(43,52,54,0.07)] max-[520px]:grid-cols-[40px_minmax(0,1fr)]";
-const allowanceCardClass =
-  "relative grid min-h-24 grid-cols-[minmax(0,1fr)_96px] items-center gap-4 rounded-3xl bg-surface-low py-4 pl-4 pr-16 max-[520px]:grid-cols-1 max-[520px]:rounded-[22px] max-[520px]:pr-14";
 const floatingAddButtonClass =
   "fixed bottom-23 z-30 grid h-13 w-13 place-items-center rounded-full border-0 bg-[#007b80] text-white shadow-[0_7px_16px_rgba(0,106,113,0.24)] transition-transform hover:scale-105 active:scale-95 max-[520px]:right-4 min-[521px]:right-[max(16px,calc((100vw-640px)/2+16px))]";
 
@@ -91,7 +96,7 @@ export function OverviewPage({ selectedFund, payments, totalSaved, remaining, on
         id: payment.id,
         title: payment.title,
         amount: payment.amount,
-        meta: `${formatCreatedAt(payment.createdAt)}`,
+        meta: formatPaymentWhenLabel(payment),
         status: payment.note ? "Pending" : "Confirmed",
         category,
       };
@@ -144,7 +149,37 @@ export function OverviewPage({ selectedFund, payments, totalSaved, remaining, on
     return { total, breakdown, pieData };
   }, [payments, selectedFund]);
 
-  console.log(categoryTotals, 'categoryTotals')
+  const dailySpending = useMemo(() => {
+    if (!selectedFund?.startDate || !selectedFund?.endDate) return [];
+
+    const tripDays = eachDayInRange(selectedFund.startDate, selectedFund.endDate);
+    const totals = new Map<string, number>();
+
+    payments
+      .filter((payment) => payment.groupId === selectedFund.id)
+      .forEach((payment) => {
+        if (payment.category === "Hotel" && payment.checkIn && payment.checkOut) {
+          splitHotelStayAmount(payment.amount, payment.checkIn, payment.checkOut).forEach(
+            (share, dayKey) => {
+              totals.set(dayKey, (totals.get(dayKey) ?? 0) + share);
+            },
+          );
+          return;
+        }
+
+        const dayKey = getPaymentDayKey(payment);
+        if (!dayKey) return;
+        totals.set(dayKey, (totals.get(dayKey) ?? 0) + payment.amount);
+      });
+
+    return tripDays.map((dayKey) => ({
+      dayKey,
+      label: formatDayLabel(dayKey),
+      amount: totals.get(dayKey) ?? 0,
+    }));
+  }, [payments, selectedFund]);
+
+  const maxDailyAmount = dailySpending.reduce((max, day) => Math.max(max, day.amount), 0);
 
   return (
     <section className="grid gap-4">
@@ -313,19 +348,55 @@ export function OverviewPage({ selectedFund, payments, totalSaved, remaining, on
         )}
       </div>
 
-      <article className={allowanceCardClass}>
-        <div>
-          <span className="block text-[0.68rem] font-black uppercase tracking-[0.12em] text-[#566164]">
-            Daily Allowance
-          </span>
-          <strong className="mt-1.5 inline-block text-xl font-black text-[#00747b]">
-            {currency.format(Math.max(amountRemaining / 10, 0), selectedFund?.currency)}
-          </strong>
-          <p className="ml-1.5 inline-block text-[#566164] text-xs">remaining today</p>
-        </div>
-        <div className="h-2 overflow-hidden rounded-full bg-[#d1e0e4]" aria-hidden="true">
-          <span className="block h-full w-2/3 rounded-[inherit] bg-secondary" />
-        </div>
+      <article className="relative rounded-3xl bg-white/95 p-4 shadow-[0_4px_12px_rgba(43,52,54,0.06)] max-[520px]:rounded-[22px]">
+        <p className="mb-1 text-sm font-black text-[#162225]">Daily Spending</p>
+        <p className="mb-3 text-xs font-semibold text-[#566164]">
+          {selectedFund?.startDate && selectedFund?.endDate
+            ? `${selectedFund.startDate} — ${selectedFund.endDate}`
+            : "Add trip dates to see daily spending"}
+        </p>
+
+        {dailySpending.length > 0 ? (
+          <div className="max-h-72 overflow-y-auto pr-1">
+            <ResponsiveContainer width="100%" height={Math.max(180, dailySpending.length * 34)}>
+              <BarChart
+                data={dailySpending}
+                layout="vertical"
+                margin={{ top: 4, right: 8, left: 4, bottom: 4 }}
+              >
+                <XAxis type="number" hide domain={[0, maxDailyAmount || 1]} />
+                <YAxis
+                  type="category"
+                  dataKey="label"
+                  width={52}
+                  tick={{ fill: "#566164", fontSize: 11, fontWeight: 600 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  cursor={{ fill: "rgba(0,123,128,0.08)" }}
+                  formatter={(value: number) =>
+                    currency.format(value, selectedFund?.currency)
+                  }
+                  labelFormatter={(label) => String(label)}
+                />
+                <Bar dataKey="amount" radius={[0, 8, 8, 0]} maxBarSize={16}>
+                  {dailySpending.map((entry) => (
+                    <Cell
+                      key={entry.dayKey}
+                      fill={entry.amount > 0 ? "#007b80" : "#dce7ea"}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <p className="rounded-2xl bg-surface-low py-8 text-center text-sm font-semibold text-[#566164]">
+            No trip dates to chart yet.
+          </p>
+        )}
+
         <button className={floatingAddButtonClass} type="button" aria-label="Add expense" onClick={onAddExpense}>
           <Plus size={22} />
         </button>

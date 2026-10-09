@@ -1,4 +1,5 @@
 export type PaymentGroupType = "month" | "trip";
+export type PaymentGroupStatus = "active" | "deleted";
 
 export type Trip = {
   id: string;
@@ -20,9 +21,12 @@ export type PaymentGroup = {
   endDate?: string;
   imageUrl?: string;
   currency?: string;
+  status?: PaymentGroupStatus;
   userId?: string;
   createdAt?: unknown;
 };
+
+export const isActivePaymentGroup = (group: PaymentGroup) => group.status !== "deleted";
 
 export type Payment = {
   id: string;
@@ -33,6 +37,8 @@ export type Payment = {
   currency?: string;
   paidBy: string;
   date?: string;
+  checkIn?: string;
+  checkOut?: string;
   note: string;
   userId?: string;
   createdAt?: unknown;

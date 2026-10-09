@@ -1,4 +1,4 @@
-import { addDoc, collection, deleteDoc, doc, onSnapshot, query, serverTimestamp, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, onSnapshot, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { db, auth } from "../lib/firebase";
 import { readLocal, watchLocal, writeLocal } from "../lib/localStore";
 import { Listener, NewPayment, NewPaymentGroup, Payment, PaymentGroup } from "../types/finance";
@@ -41,7 +41,12 @@ export const subscribePayments = (userId: string, listener: Listener<Payment>) =
 export const createGroup = async (group: NewPaymentGroup) => {
   if (!db) {
     const groups = readLocal<PaymentGroup>(localKey.groups);
-    const createdGroup = { ...group, id: crypto.randomUUID(), createdAt: Date.now() };
+    const createdGroup = {
+      ...group,
+      status: group.status ?? "active",
+      id: crypto.randomUUID(),
+      createdAt: Date.now(),
+    };
     writeLocal(localKey.groups, [createdGroup, ...groups]);
     return createdGroup;
   }
@@ -49,6 +54,7 @@ export const createGroup = async (group: NewPaymentGroup) => {
   const userId = auth?.currentUser?.uid || "";
   const groupRef = await addDoc(collection(db, "newtrip"), {
     ...group,
+    status: group.status ?? "active",
     userId,
     createdAt: serverTimestamp(),
   });
@@ -80,4 +86,32 @@ export const removePayment = async (paymentId: string) => {
   }
 
   await deleteDoc(doc(db, "payments", paymentId));
+};
+
+export const updateGroup = async (groupId: string, updates: Partial<NewPaymentGroup>) => {
+  if (!db) {
+    writeLocal(
+      localKey.groups,
+      readLocal<PaymentGroup>(localKey.groups).map((group) =>
+        group.id === groupId ? { ...group, ...updates } : group,
+      ),
+    );
+    return;
+  }
+
+  await updateDoc(doc(db, "newtrip", groupId), updates);
+};
+
+export const removeGroup = async (groupId: string) => {
+  if (!db) {
+    writeLocal(
+      localKey.groups,
+      readLocal<PaymentGroup>(localKey.groups).map((group) =>
+        group.id === groupId ? { ...group, status: "deleted" } : group,
+      ),
+    );
+    return;
+  }
+
+  await updateDoc(doc(db, "newtrip", groupId), { status: "deleted" });
 };

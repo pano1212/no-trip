@@ -2,7 +2,8 @@ import { LogOut, Plus, ReceiptText, WalletCards, X } from "lucide-react";
 import { AppView } from "./BottomBar";
 import { Payment, PaymentGroupWithTotal } from "../types/finance";
 import { currency } from "../utils/currency";
-import { formatCreatedAt } from "../utils/date";
+import { formatPaymentWhenLabel } from "../utils/date";
+import { NotripLogoMark } from "./NotripBrand";
 
 type HistorySidebarProps = {
   isOpen: boolean;
@@ -57,9 +58,12 @@ export function HistorySidebar({
         aria-label="Saved history"
       >
         <div className="mb-3 flex items-center justify-between gap-3 px-2">
-          <div>
-            <p className="text-[0.72rem] font-black uppercase tracking-widest text-ink-muted">Saved history</p>
-            <h2 className="font-display text-xl font-black text-primary">The Fluid Ledger</h2>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <NotripLogoMark size="sm" />
+            <div className="min-w-0">
+              <p className="text-[0.72rem] font-black uppercase tracking-widest text-ink-muted">Saved history</p>
+              <p className="truncate text-sm font-bold text-[#162225]">Notrip</p>
+            </div>
           </div>
           <button
             className="grid h-10 w-10 place-items-center rounded-full border-0 bg-white text-ink-muted"
@@ -120,7 +124,7 @@ export function HistorySidebar({
                   <strong className="truncate text-sm">{payment.title}</strong>
                 </span>
                 <span className="text-xs font-bold text-ink-muted">
-                  {formatCreatedAt(payment.createdAt)} · {currency.format(payment.amount, payment.currency || funds.find((f) => f.id === payment.groupId)?.currency)}
+                  {formatPaymentWhenLabel(payment)} · {currency.format(payment.amount, payment.currency || funds.find((f) => f.id === payment.groupId)?.currency)}
                 </span>
               </button>
             ))}

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, KeyRound, ReceiptText, Smartphone } from "lucide-react";
+import { ArrowLeft, KeyRound, Smartphone } from "lucide-react";
+import { AuthScreen } from "./AuthScreen";
+import { NotripBrand } from "./NotripBrand";
 import { ConfirmationResult, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { auth } from "../lib/firebase";
 
@@ -90,11 +92,7 @@ export function ForgotPasswordPage({ onBackToLogin, onLogin }: ForgotPasswordPag
   };
 
   return (
-    <main className="mx-auto grid min-h-screen w-full max-w-160 items-center px-6.5 py-7 max-[640px]:px-4.5 max-[640px]:py-6">
-      <section
-        className="grid gap-7 rounded-[42px] bg-white/80 p-7 shadow-[0_8px_24px_rgba(43,52,54,0.08)] backdrop-blur-[20px] max-[520px]:rounded-[34px]"
-        aria-label="Forgot password"
-      >
+    <AuthScreen aria-label="Forgot password">
         <button
           className="inline-flex w-fit items-center gap-2 border-0 bg-transparent px-2 pt-1 font-black text-primary"
           type="button"
@@ -104,16 +102,13 @@ export function ForgotPasswordPage({ onBackToLogin, onLogin }: ForgotPasswordPag
           Back to sign in
         </button>
 
-        <div className="flex items-center gap-3.5 px-2">
-          <span className="grid h-14.5 w-14.5 place-items-center rounded-full bg-[#f2a27f] text-white/95">
-            <ReceiptText size={30} />
-          </span>
-          <div>
-            <p className="text-[0.82rem] font-black uppercase tracking-widest text-[#687477]">Account recovery</p>
-            <h1 className="mt-1 font-display text-[clamp(1.65rem,6vw,2.15rem)] font-black text-primary">
-              Verify by phone OTP
-            </h1>
-          </div>
+        <NotripBrand subtitle="Account recovery" showSubtitle />
+
+        <div className="px-2">
+          <h2 className="font-display text-[clamp(1.35rem,4.5vw,1.65rem)] font-black text-[#162225]">
+            Verify by phone OTP
+          </h2>
+          <p className="mt-1 text-sm font-semibold text-[#566164]">Sign back into your Notrip account.</p>
         </div>
 
         <section className="grid gap-3 rounded-[26px] bg-surface-low/80 p-4" aria-label="Phone OTP recovery">
@@ -180,7 +175,6 @@ export function ForgotPasswordPage({ onBackToLogin, onLogin }: ForgotPasswordPag
         </section>
 
         <div id="forgot-password-recaptcha" />
-      </section>
-    </main>
+    </AuthScreen>
   );
 }
